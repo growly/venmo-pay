@@ -4,6 +4,8 @@
 import sys
 import random
 
+import cvxpy as cp
+
 import venmo_api
 from emoji import emojize
 
@@ -55,7 +57,21 @@ message = ''''''
 words = message.split()
 print(len(words))
 
-payments = [4.20] * 8 + [0.69] * 3
+# We can use cvxpy to find the mix of $4.20 and $0.69 payments that results in
+# us paying the closest sum to the dues, $36 (this is a mixed integer program).
+# We can optionally constrain it to only a certain number of payments at most
+# or (not shown) only allow positive error.
+x = cp.Variable(2, integer=True)
+MAX_TRANSACTIONS = 50
+constraints = [x >= 0,
+               x[0] + x[1] <= MAX_TRANSACTIONS]   # Max transactions = 50
+obj = cp.Minimize(cp.abs(4.2*x[0] + 0.69*x[1] - 36))
+prob = cp.Problem(obj, constraints)
+prob.solve()
+#print(x.value)
+#print(prob.value)
+
+payments = [4.20] * int(x[0]) + [0.69] * int(x[1])
 random.shuffle(payments)
 
 payments = payments + [0.69]
