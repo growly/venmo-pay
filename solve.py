@@ -32,10 +32,9 @@ def use_cvxpy(target: float, max_transactions: Optional[int]):
     # cvxpy is super cool and does this for us:
     import cvxpy as cp
     x = cp.Variable(2, integer=True)
-    MAX_TRANSACTIONS = 50
     constraints = [x >= 0]
     if max_transactions is not None:
-        constraints.append(x[0] + x[1] <= MAX_TRANSACTIONS)
+        constraints.append(x[0] + x[1] <= max_transactions)
     obj = cp.Minimize(cp.abs(4.2*x[0] + 0.69*x[1] - target))
     prob = cp.Problem(obj, constraints)
     prob.solve()
